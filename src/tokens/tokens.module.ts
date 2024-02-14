@@ -6,6 +6,6 @@ import { TokensEntity } from './entities/tokens.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([TokensEntity])],
   providers: [TokensService],
-  exports: [TypeOrmModule]
+  exports: [TokensService]
 })
 export class TokensModule {}

@@ -7,18 +7,22 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { TokensModule } from './tokens/tokens.module';
 import { DemandModule } from './demand/demand.module';
+import { UserEntity } from './user/entities/user.entity';
+import { GroupEntity } from './group/entities/group.entity';
+import { TokensEntity } from './tokens/entities/tokens.entity';
+import { DemandEntity } from './demand/entities/demand.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({isGlobal: true}),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
+      host: process.env.APP_HOST,
       port: +process.env.MYSQL_TCP_PORT,
       username: process.env.MYSQL_USER,
       password: process.env.MYSQL_PASSWORD,
       database: process.env.MYSQL_DATABASE,
-      entities: [`${__dirname}/**/entities/*{.js,.ts}`],
+      entities: [UserEntity, GroupEntity, TokensEntity, DemandEntity],
       synchronize: process.env.NODE_ENV !== 'production'
     }), 
     UserModule, GroupModule, AuthModule, TokensModule, DemandModule

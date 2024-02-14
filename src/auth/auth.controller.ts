@@ -11,6 +11,7 @@ import { ResetPwdDto } from './dto/reset-pwd.dto';
 import { GroupService } from 'src/group/group.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GroupEntity } from 'src/group/entities/group.entity';
+import { MessagePattern } from '@nestjs/microservices';
 
 @Controller('auth')
 export class AuthController extends BaseUtils {
@@ -23,7 +24,7 @@ export class AuthController extends BaseUtils {
     super()
   }
 
-  @Post('login')
+  @MessagePattern('LOGIN')
   async login(@Body(new ValidationPipe()) loginDto: LoginDto, @Res() res:any)  {
     try {
       const user:UserEntity = await this.userService.getOneBySearchOptions({email:loginDto.email}, [], {id: true, email:true, password: true});
@@ -39,7 +40,7 @@ export class AuthController extends BaseUtils {
     }
   }
 
-  @Get('refreshToken')
+  @MessagePattern('REFRESH_TOKEN')
   async refreshToken(@Req() req:any, @Res() res:any) {
     try {
       const tokens:TokensEntity = await this.tokensService.getTokensBySearchOptions({user: {id: +req.user.userId}} , ["user"], {id: true, refreshToken: true, user: {id: true, email:true}});
@@ -55,7 +56,7 @@ export class AuthController extends BaseUtils {
     }
   }
 
-  @Post('register')
+  @MessagePattern('REGISTER')
   async create(@Body(new ValidationPipe()) createUserDto: CreateUserDto):Promise<unknown> {
     try {
       const userExist:{id:number} = await this.userService.getOneBySearchOptions({email: createUserDto.email}, [], {id: true});
@@ -70,7 +71,7 @@ export class AuthController extends BaseUtils {
     }
   }
 
-  @Put('resetPwd')
+  @MessagePattern('RESET_PWD')
   async resetPwd(@Body(new ValidationPipe()) resetPwdDto: ResetPwdDto, @Req() req:any):Promise<string> {
     try {
       const user:UserEntity = await this.userService.getOneById(+req.user.userId, [], {id: true, password: true})

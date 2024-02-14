@@ -6,6 +6,6 @@ import { DemandEntity } from './entities/demand.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([DemandEntity])],
   providers: [DemandService],
-  exports: [TypeOrmModule]
+  exports: [DemandService]
 })
 export class DemandModule {}

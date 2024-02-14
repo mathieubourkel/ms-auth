@@ -10,6 +10,6 @@ import { DemandEntity } from 'src/demand/entities/demand.entity';
   imports: [TypeOrmModule.forFeature([GroupEntity, DemandEntity])],
   controllers: [GroupController],
   providers: [GroupService, DemandService],
-  exports: [TypeOrmModule]
+  exports: [GroupService]
 })
 export class GroupModule {}
