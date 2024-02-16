@@ -1,0 +1,46 @@
+stages:
+  - publish
+  - test
+  - deploy
+
+workflow:
+  rules: 
+    - if: $CI_COMMIT_BRANCH == "main"
+
+publish:
+  image: docker:stable
+  stage: publish
+  services: 
+    - docker:dind
+  before_script:
+    - docker login $CI_REGISTRY -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" 
+  script:
+    - docker build --target=production -t $CI_REGISTRY_IMAGE:$TAG_PROD .
+    - docker push $CI_REGISTRY_IMAGE:$TAG_PROD
+
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Security/Container-Scanning.gitlab-ci.yml
+
+container_scanning:
+  variables:
+    CS_IMAGE: registry.alt-tools.tech/chappy/ms-auth:production
+
+deploy:
+  image: alpine:latest
+  stage: deploy
+  script:
+    - chmod og= $ID_RSA
+    - apk update && apk add openssh-client
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $AWS_USER@$AWS_DNS "docker login $CI_REGISTRY -u '$CI_REGISTRY_USER' -p '$CI_REGISTRY_PASSWORD'"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $AWS_USER@$AWS_DNS "docker pull $CI_REGISTRY_IMAGE:$TAG_PROD"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $AWS_USER@$AWS_DNS "docker container rm -f ms_auth || true"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $AWS_USER@$AWS_DNS "docker-compose up -d"
+
+# dast:
+#   variables:
+#     DAST_WEBSITE: "https://app-chappy.ddns.net"
+#     DAST_FULL_SCAN_ENABLED: "true"
+#     DAST_AUTH_URL: "https://app-chappy.ddns.net/login"
+#     DAST_AUTH_USERNAME: “mathieu.bourkel@gmail.com”
+#     DAST_AUTH_PASSWORD: “password”

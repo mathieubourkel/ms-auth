@@ -1,6 +1,8 @@
-import { IsOptional, IsString, Length } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Length } from 'class-validator';
 
 export class UpdateUserDto  {
+    @IsNumber()
+    id: number
     @IsOptional()
     @IsString()
     @Length(1, 50)

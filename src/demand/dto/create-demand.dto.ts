@@ -11,10 +11,8 @@ export class UserDto {
 export class CreateDemandDto {
     @ValidateNested()
     group: GroupDto
-    
     @ValidateNested()
     user: UserDto
-
     @IsInt()
     @Max(3)
     status:number

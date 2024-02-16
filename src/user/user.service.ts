@@ -62,7 +62,7 @@ export class UserService extends BaseUtils {
     }
   }
 
-  async addCompany(user: UserEntity, rejoinGroupDto: RejoinGroupDto) {
+  async addGroup(user: UserEntity, rejoinGroupDto: RejoinGroupDto) {
     try {
       return this.userRepository.save(this.userRepository.merge(user, rejoinGroupDto))
     } catch (error) {

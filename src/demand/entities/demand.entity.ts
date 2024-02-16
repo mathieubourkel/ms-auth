@@ -1,7 +1,7 @@
 import { UserEntity } from "src/user/entities/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { GroupEntity } from "../../group/entities/group.entity";
-import { DemandsStatusEnum } from "./demands.status.enum";
+import { DemandsStatusEnum } from "../../../enums/demands.status.enum";
 
 @Entity({name:"demand"})
 export class DemandEntity {

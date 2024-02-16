@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn,  ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { UserRoleEnum } from "../enums/user.role.enum";
-import { UserStatusEnum } from "../enums/user.status.enum";
+import { UserRoleEnum } from "../../../enums/user.role.enum";
+import { UserStatusEnum } from "../../../enums/user.status.enum";
 import { GroupEntity } from "src/group/entities/group.entity";
 import { TokensEntity } from "src/tokens/entities/tokens.entity";
 import { DemandEntity } from "src/demand/entities/demand.entity";
@@ -20,7 +20,7 @@ export class UserEntity {
     @Column({type:"varchar"})
     email: string;
 
-    @Column({type:"varchar"})
+    @Column({type:"varchar", select: false})
     password: string;
 
     @Column({type: "varchar"})

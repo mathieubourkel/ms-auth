@@ -17,17 +17,16 @@ import { DemandEntity } from './demand/entities/demand.entity';
     ConfigModule.forRoot({isGlobal: true}),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: process.env.APP_HOST,
+      host: process.env.MYSQL_HOST,
       port: +process.env.MYSQL_TCP_PORT,
       username: process.env.MYSQL_USER,
       password: process.env.MYSQL_PASSWORD,
       database: process.env.MYSQL_DATABASE,
       entities: [UserEntity, GroupEntity, TokensEntity, DemandEntity],
-      synchronize: process.env.NODE_ENV !== 'production'
+      synchronize: true
     }), 
     UserModule, GroupModule, AuthModule, TokensModule, DemandModule
-  ],
+  ]
 })
-export class AppModule {
-  constructor(private dataSource: DataSource) {}
-}
+
+export class AppModule {}

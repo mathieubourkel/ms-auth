@@ -12,7 +12,7 @@ export class CreateUserDto {
     @IsEmail()
     email: string
     @IsString()
-    @Length(12, 100)
+    @Length(8, 100)
     password: string
     @IsString()
     @Length(1, 250)
