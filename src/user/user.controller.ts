@@ -23,7 +23,7 @@ export class UserController extends BaseUtils {
   @MessagePattern("INFOS_USER")
   async getInfosUserConnected(@Payload() userId:number) {
     try {
-      return await this.userService.getOneById(userId, ["myOwnGroups", "groups"]);
+      return await this.userService.getOneById(userId, ["myOwnGroups", "tokens", "demands"]);
     } catch (error) {
       this._Ex("GET-INFO-USER-FAILED-CTRL", 400, error.message)
     }

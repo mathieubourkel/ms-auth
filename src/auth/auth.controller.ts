@@ -96,7 +96,7 @@ export class AuthController extends BaseUtils {
     const token:string = jwt.sign(
       { userId, email, exirationDate: tokenDate },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "3h" }
+      { expiresIn: "24h" }
     );
     const refreshToken:string = jwt.sign(
       { userId, email, exirationDate: refreshDate },
