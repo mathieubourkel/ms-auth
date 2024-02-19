@@ -6,14 +6,14 @@ import { UserEntity } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { LoginDto } from './dto/login.dto';
 import { TokensEntity } from 'src/tokens/entities/tokens.entity';
-import jwt from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 import { ResetPwdDto } from './dto/reset-pwd.dto';
 import { GroupService } from 'src/group/group.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GroupEntity } from 'src/group/entities/group.entity';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
-@Controller('auth')
+@Controller()
 export class AuthController extends BaseUtils {
   
   constructor(
@@ -27,28 +27,34 @@ export class AuthController extends BaseUtils {
   @MessagePattern('LOGIN')
   async login(@Payload(new ValidationPipe()) loginDto: LoginDto)  {
     try {
-      const user:UserEntity = await this.userService.getOneBySearchOptions({email:loginDto.email}, [], {id: true, email:true, password: true});
+      const user:UserEntity = await this.userService.getOneBySearchOptions({email:loginDto.email}, [], {id: true, email:true, password: true, firstname: true, lastname: true});
       if (!user) throw this._Ex("Bad Credentials", 401, "AC-LOG");
       if (!await __decryptPassword(loginDto.password, user.password)) this._Ex("Bad Credentials", 401, "AC-LOG-27");
-      const {token, refreshToken, cookieOptions} = await this.__createTokens(user.id, user.email);
-      const result = await this.tokensService.update(user.id, refreshToken, [], {id: true, firstname: true, lastname: true, status: true, email:true});
+      const { token, refreshToken } = await this.__createTokens(user.id, user.email);
+      const tokens:any = await this.tokensService.getTokensBySearchOptions({user:{id: user.id}})
+      if (tokens) {
+        var result:any = await this.tokensService.update(tokens, {refreshToken, token})
+      } else {
+          var result:any = await this.tokensService.create({refreshToken, user, token, emailToken:""})
+        }
+      delete user.password;
       if (!result) this._Ex("Failed to Update", 500, "AC-LOG")
-      return { token, user: result , refreshToken, cookieOptions};
+      return { token, user, refreshToken };
     } catch (error) {
       this._catchEx(error)
     }
   }
 
   @MessagePattern('REFRESH_TOKEN')
-  async refreshToken(@Payload() req:any) {
+  async refreshToken(@Payload('userId') userId:number, @Payload('refreshToken') oldRefreshToken:string) {
     try {
-      const tokens:TokensEntity = await this.tokensService.getTokensBySearchOptions({user: {id: +req.user.userId}} , ["user"], {id: true, refreshToken: true, user: {id: true, email:true}});
+      const tokens:TokensEntity = await this.tokensService.getTokensBySearchOptions({user: {id: userId}}, ["user"], {id: true, refreshToken: true, user: {id: true, email:true}});
       if (!tokens) throw this._Ex("No Tokens", 401, "AC-REFRESH");
-      if (tokens.refreshToken != req.cookies.refreshToken) this._Ex("Tokens does not match", 401, "AC-REFRESH-43");
-      const {token, refreshToken, cookieOptions} = await this.__createTokens(+req.user.id, tokens.user.email);
-      const result = await this.tokensService.update(tokens.id, refreshToken, [], {id: true, firstname: true, lastname: true, status: true, email:true});
+      if (tokens.refreshToken != oldRefreshToken) this._Ex("Tokens does not match", 401, "AC-REFRESH-43");
+      const {token, refreshToken} = await this.__createTokens(userId, tokens.user.email);
+      const result = await this.tokensService.update(tokens, {refreshToken, token});
       if (!result) this._Ex("Failed to Refresh", 500, "AC-REFRESH")
-      return { token, user: result , refreshToken, cookieOptions};
+      return result;
     } catch (error) {
       this._catchEx(error)
     }
@@ -90,7 +96,7 @@ export class AuthController extends BaseUtils {
     const token:string = jwt.sign(
       { userId, email, exirationDate: tokenDate },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "9h" }
+      { expiresIn: "3h" }
     );
     const refreshToken:string = jwt.sign(
       { userId, email, exirationDate: refreshDate },
@@ -98,12 +104,8 @@ export class AuthController extends BaseUtils {
       { expiresIn: "4w" }
     );
 
-    const cookieOptions:{httpOnly: boolean, maxAge: number, secure:boolean} = {
-      httpOnly: process.env.NODE_ENV === 'production',
-      maxAge:700000000,
-      secure: process.env.NODE_ENV === 'production',
-    }
+    
 
-    return {token, refreshToken, cookieOptions}
+    return {token, refreshToken}
   }
 }

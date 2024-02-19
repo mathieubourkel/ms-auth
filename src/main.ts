@@ -9,6 +9,7 @@ async function bootstrap() {
       servers: [`nats://${process.env.BROKER_HOST}:${process.env.BROKER_PORT}`]
     }
   });
-  app.listen()
+  await app.listen()
+  console.log(`[MS-AUTH] with NATS`)
 }
 bootstrap();

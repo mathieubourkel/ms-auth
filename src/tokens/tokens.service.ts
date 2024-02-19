@@ -11,7 +11,7 @@ export class TokensService extends BaseUtils {
     super()
 }
 
-async create(tokens: TokensEntity){
+async create(tokens: any){
   try {
     return await this.tokensRepository.save(tokens)
   } catch (error) {
@@ -27,10 +27,9 @@ async getTokensBySearchOptions(searchOptions:{}, relations?: Array<string>, sele
   }
 }
 
-async update(id:number, refreshToken:string, relations?: Array<string>, select?:any) {
+async update(tokens:any, newTokens:{}, relations?: Array<string>, select?:any) {
   try {
-    const result = await this.tokensRepository.findOne({ where: { id } , relations, select})
-    return this.tokensRepository.save(this.tokensRepository.merge(result, {refreshToken}))
+    return this.tokensRepository.save(this.tokensRepository.merge(tokens, newTokens))
   } catch (error) {
     this._catchEx(error)
   }
