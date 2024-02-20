@@ -16,34 +16,34 @@ export class UserController extends BaseUtils {
     try {
       return await this.userService.findAll([], {id: true, email:true, firstname: true, lastname: true});
     } catch (error) {
-      this._Ex("ALL_USERS", 400, error.message)
+      this._catchEx(error)
     }
   }
 
-  @MessagePattern("INFOS_USER")
-  async getInfosUserConnected(@Payload() userId:number) {
+  @MessagePattern("GET_USER_BYID")
+  async getUserById(@Payload() userId:number) {
     try {
       return await this.userService.getOneById(userId, ["myOwnGroups", "tokens", "demands"]);
     } catch (error) {
-      this._Ex("GET-INFO-USER-FAILED-CTRL", 400, error.message)
+      this._catchEx(error)
     }
   }
 
-  @MessagePattern("GET_ONE_USER_FOR_PWD")
-  async getOneUser(@Payload() searchOption:any) {
+  @MessagePattern("GET_USER_WITH_PWD")
+  async getOneUser(@Payload() searchOption:{}) {
     try {
       return await this.userService.getOneBySearchOptions(searchOption, [], {id: true, password: true, email: true});
     } catch (error) {
-      this._Ex("GET-INFO-USER-FAILED-CTRL", 400, error.message)
+      this._catchEx(error)
     }
   }
 
   @MessagePattern("GET_ONE_LIGHT_USER")
-  async getOneLightUser(@Payload() searchOption:any) {
+  async getOneLightUser(@Payload() searchOption:{}) {
     try {
       return await this.userService.getOneBySearchOptions(searchOption, [], {id: true, email: true});
     } catch (error) {
-      this._Ex("GET-INFO-USER-FAILED-CTRL", 400, error.message)
+      this._catchEx(error)
     }
   }
 
@@ -56,7 +56,7 @@ export class UserController extends BaseUtils {
       if (!result) this._Ex("FAILED TO UPDATE USER", 400, "UC-FAILED");
       return result;
     } catch (error) {
-      this._Ex("UPD-USR-CTRL", 400, error.message)
+      this._catchEx(error)
     }
   }
 
@@ -65,7 +65,7 @@ export class UserController extends BaseUtils {
     try {
       return this.userService.delete(userId);
     } catch (error) {
-      this._Ex("DELETE-USER-CTRL", 400, error.message)
+      this._catchEx(error)
     } 
   }
 }
