@@ -35,6 +35,9 @@ export class UserEntity {
     @Column({type:"varchar"})
     phone: string;
 
+    @Column({type:"int", default:0})
+    count: number;
+
     @Column({type:"enum", enum: UserStatusEnum, default: UserStatusEnum.PENDING})
     status: UserStatusEnum;
 

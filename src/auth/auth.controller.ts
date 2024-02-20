@@ -29,19 +29,20 @@ export class AuthController extends BaseUtils {
   @MessagePattern('LOGIN')
   async login(@Payload(new ValidationPipe()) loginDto: LoginDto)  {
     try {
-      const user:UserEntity = await this.userService.getOneBySearchOptions({email:loginDto.email}, [], {id: true, email:true, password: true, firstname: true, lastname: true, status: true});
+      const user:UserEntity = await this.userService.getOneBySearchOptions({email:loginDto.email}, [], {id: true, email:true, password: true, firstname: true, lastname: true, status: true, count: true});
       if (!user) this._Ex("Bad Credentials", 401, "AC-LOG");
-      if (user.status != 1) throw this._Ex("User Status NOT OK", 401, "/login")
+      if (user.status != 1) this._Ex("User Status NOT OK", 401, "/login")
+      await this.userService.updateCountUser(user)
+      if (user.count > 6) {
+        await this.userService.updateStatusUser(user, UserStatusEnum.BLOCKED)
+        this._Ex("You blocked your accout", 401, "/login")
+      }
       if (!await __decryptPassword(loginDto.password, user.password)) this._Ex("Bad Credentials", 401, "AC-LOG-27");
       const { token, refreshToken } = await this.__createTokens(user.id, user.email, user.firstname, user.lastname);
       const tokens:any = await this.tokensService.getTokensBySearchOptions({user:{id: user.id}})
-      if (tokens) {
-        var result:any = await this.tokensService.update(tokens, {refreshToken, token})
-      } else {
-          var result:any = await this.tokensService.create({refreshToken, user, token, emailToken:""})
-        }
+      await this.tokensService.update(tokens, {refreshToken, token})
       delete user.password;
-      if (!result) this._Ex("Failed to Update", 500, "AC-LOG")
+      await this.userService.updateCountUser(user, true)
       return { token, user, refreshToken };
     } catch (error) {
       this._catchEx(error)
@@ -70,8 +71,8 @@ export class AuthController extends BaseUtils {
       if (userExist) this._Ex("USER-ALRDY-EXIST", 400, "AC-RGS");
       const user:UserEntity = await this.userService.create({...createUserDto, password: await __hashPassword(createUserDto.password)});
       if (!user) this._Ex("FAILED-TO-CREATE-USER", 400, "AC-RGS");
-      const validationToken = await this.__createValidationToken(user.id, user.email)
-      if (!createUserDto.name) return {id: user.id, firstname: user.firstname, email: user.email, validationToken}
+      const tokens = await this.tokensService.create({token:'', refreshToken:'', emailToken:'', validationToken: await this.__createValidationToken(user.id, user.email), user:{id:user.id}})
+      if (!createUserDto.name) return {id: user.id, firstname: user.firstname, email: user.email, validationToken: tokens.validationToken}
       const group:GroupEntity = await this.groupService.create({name: createUserDto.name, additionalInfos: createUserDto.additionalInfos, description: createUserDto.description, owner: user})
       return {user: {id: user.id, firstname: user.firstname, email: user.email}, group} 
     } catch (error) {

@@ -10,7 +10,7 @@ export class TokensEntity {
     @Column({type:"varchar"})
     refreshToken: string;
 
-    @Column({type:"varchar"})
+    @Column({type:"text"})
     token: string;
 
     @Column({type:"varchar"})

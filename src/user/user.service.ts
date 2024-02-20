@@ -6,6 +6,7 @@ import { UserEntity } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from 'src/auth/dto/create-user.dto';
 import { RejoinGroupDto } from './dto/rejoin-group.dto';
+import { UserStatusEnum } from 'enums/user.status.enum';
 
 @Injectable()
 export class UserService extends BaseUtils {
@@ -56,7 +57,7 @@ export class UserService extends BaseUtils {
 
   async updatePassword(user: UserEntity, updatePassword: string) {
     try {
-      return this.userRepository.save(this.userRepository.merge(user, {password: updatePassword}))
+      return this.userRepository.save(this.userRepository.merge(user, {password: updatePassword, status: UserStatusEnum.ACTIVE}))
     } catch (error) {
       this._catchEx(error)
     }
@@ -65,6 +66,15 @@ export class UserService extends BaseUtils {
   async updateStatusUser(user: UserEntity, status: number) {
     try {
       return this.userRepository.save(this.userRepository.merge(user, {status: status}))
+    } catch (error) {
+      this._catchEx(error)
+    }
+  }
+
+  async updateCountUser(user: UserEntity, resetCount?: boolean) {
+    try {
+      if (resetCount) user.count = 0
+      return await this.userRepository.save(this.userRepository.merge(user, {count: user.count +1}))
     } catch (error) {
       this._catchEx(error)
     }
