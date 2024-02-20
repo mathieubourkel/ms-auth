@@ -14,6 +14,9 @@ export class TokensEntity {
     token: string;
 
     @Column({type:"varchar"})
+    validationToken: string;
+
+    @Column({type:"varchar"})
     emailToken: string;
 
     @OneToOne  (() => UserEntity, user => user.tokens) user: UserEntity;

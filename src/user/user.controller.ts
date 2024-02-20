@@ -29,6 +29,24 @@ export class UserController extends BaseUtils {
     }
   }
 
+  @MessagePattern("GET_ONE_USER_FOR_PWD")
+  async getOneUser(@Payload() searchOption:any) {
+    try {
+      return await this.userService.getOneBySearchOptions(searchOption, [], {id: true, password: true, email: true});
+    } catch (error) {
+      this._Ex("GET-INFO-USER-FAILED-CTRL", 400, error.message)
+    }
+  }
+
+  @MessagePattern("GET_ONE_LIGHT_USER")
+  async getOneLightUser(@Payload() searchOption:any) {
+    try {
+      return await this.userService.getOneBySearchOptions(searchOption, [], {id: true, email: true});
+    } catch (error) {
+      this._Ex("GET-INFO-USER-FAILED-CTRL", 400, error.message)
+    }
+  }
+
   @MessagePattern("MODIFY_USER")
   async update(@Payload(new ValidationPipe()) updateUserDto: UpdateUserDto):Promise<UserEntity> {
     try {

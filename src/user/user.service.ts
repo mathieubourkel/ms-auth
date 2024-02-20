@@ -62,6 +62,14 @@ export class UserService extends BaseUtils {
     }
   }
 
+  async updateStatusUser(user: UserEntity, status: number) {
+    try {
+      return this.userRepository.save(this.userRepository.merge(user, {status: status}))
+    } catch (error) {
+      this._catchEx(error)
+    }
+  }
+
   async addGroup(user: UserEntity, rejoinGroupDto: RejoinGroupDto) {
     try {
       return this.userRepository.save(this.userRepository.merge(user, rejoinGroupDto))
