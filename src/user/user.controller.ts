@@ -23,7 +23,7 @@ export class UserController extends BaseUtils {
   @MessagePattern("GET_USER_BYID")
   async getUserById(@Payload() userId:number) {
     try {
-      return await this.userService.getOneById(userId, ["myOwnGroups", "tokens", "demands"]);
+      return await this.userService.getOneById(userId, ["myOwnGroups","myOwnGroups.demands","myOwnGroups.demands.user", "demands", "demands.group"]);
     } catch (error) {
       this._catchEx(error)
     }
@@ -48,9 +48,9 @@ export class UserController extends BaseUtils {
   }
 
   @MessagePattern("MODIFY_USER")
-  async update(@Payload(new ValidationPipe()) updateUserDto: UpdateUserDto):Promise<UserEntity> {
+  async update(@Payload('body', new ValidationPipe()) updateUserDto: UpdateUserDto, @Payload('userId') userId:number):Promise<UserEntity> {
     try {
-      const user:UserEntity = await this.userService.getOneById(updateUserDto.id, [], {id: true})
+      const user:UserEntity = await this.userService.getOneById(userId, [], {id: true})
       if (!user) this._Ex("FAILED TO FIND USER", 400, "UC-NOT-FND");
       const result:UserEntity = await this.userService.update(user, updateUserDto);
       if (!result) this._Ex("FAILED TO UPDATE USER", 400, "UC-FAILED");
@@ -61,7 +61,7 @@ export class UserController extends BaseUtils {
   }
 
   @MessagePattern("DELETE_USER")
-  delete(@Payload() userId:number) {
+  delete(@Payload('id') userId:number) {
     try {
       return this.userService.delete(userId);
     } catch (error) {

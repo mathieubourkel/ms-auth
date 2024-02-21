@@ -7,9 +7,7 @@ import { UserService } from 'src/user/user.service';
 import { LoginDto } from './dto/login.dto';
 import { TokensEntity } from 'src/tokens/entities/tokens.entity';
 import { ResetPwdDto } from './dto/reset-pwd.dto';
-import { GroupService } from 'src/group/group.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { GroupEntity } from 'src/group/entities/group.entity';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ForgotPwdDto } from './dto/forgot-pwd.dto';
 import { UserStatusEnum } from 'enums/user.status.enum';
@@ -20,8 +18,7 @@ export class AuthController extends BaseUtils {
   
   constructor(
     private readonly userService: UserService,
-    private readonly tokensService: TokensService,
-    private readonly groupService: GroupService
+    private readonly tokensService: TokensService
     ) {
     super()
   }
@@ -31,7 +28,7 @@ export class AuthController extends BaseUtils {
     try {
       const user:UserEntity = await this.userService.getOneBySearchOptions({email:loginDto.email}, [], {id: true, email:true, password: true, firstname: true, lastname: true, status: true, count: true});
       if (!user) this._Ex("BAD-CREDENTIALS", 401, "MS-AUTH_AC_LOGIN");
-      if (user.status != 1) this._Ex("ACCOUNT NOT AUTHORIZED", 401, "MS-AUTH_AC_LOGIN")
+     // if (user.status != 1) this._Ex("ACCOUNT NOT AUTHORIZED", 401, "MS-AUTH_AC_LOGIN")
       await this.userService.updateCountUser(user)
       if (user.count > 6) {
         await this.userService.updateStatusUser(user, UserStatusEnum.BLOCKED)
@@ -70,9 +67,7 @@ export class AuthController extends BaseUtils {
       const user:UserEntity = await this.userService.create({...createUserDto, password: await __hashPassword(createUserDto.password)});
       if (!user) this._Ex("FAILED-TO-CREATE-USER", 400, "MS-AUTH_REGISTER");
       const tokens = await this.tokensService.create({token:'', refreshToken:'', emailToken:'', validationToken: await __createValidationToken(user.id, user.email), user:{id:user.id}})
-      if (!createUserDto.name) return {id: user.id, firstname: user.firstname, email: user.email, validationToken: tokens.validationToken}
-      const group:GroupEntity = await this.groupService.create({name: createUserDto.name, additionalInfos: createUserDto.additionalInfos, description: createUserDto.description, owner: user})
-      return {user: {id: user.id, firstname: user.firstname, email: user.email}, group} 
+      return {id: user.id, firstname: user.firstname, email: user.email, validationToken: tokens.validationToken}
     } catch (error) {
       this._catchEx(error)
     }

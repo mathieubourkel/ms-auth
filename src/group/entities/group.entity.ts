@@ -17,7 +17,7 @@ export class GroupEntity {
     @Column({type:"varchar"})
     description: string;
 
-    @ManyToOne (() => UserEntity, owner => owner.myOwnGroups) owner:UserEntity;
+    @ManyToOne (() => UserEntity, owner => owner.myOwnGroups, { onDelete: "CASCADE" }) owner:UserEntity;
     @OneToMany (() => DemandEntity, demand => demand.group) demands: DemandEntity[];
     
 }
