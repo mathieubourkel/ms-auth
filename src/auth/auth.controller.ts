@@ -16,10 +16,8 @@ import { __createEmailToken, __createTokens, __createValidationToken } from 'src
 @Controller()
 export class AuthController extends BaseUtils {
   
-  constructor(
-    private readonly userService: UserService,
-    private readonly tokensService: TokensService
-    ) {
+  constructor(private readonly userService: UserService,
+    private readonly tokensService: TokensService) {
     super()
   }
 
@@ -35,7 +33,7 @@ export class AuthController extends BaseUtils {
         this._Ex("ACCOUNT BLOCKED", 401, "MS-AUTH_AC_LOGIN")
       }
       if (!await __decryptPassword(loginDto.password, user.password)) this._Ex("BAD-CREDENTIALS", 401, "MS-AUTH_AC_LOGIN");
-      const { token, refreshToken } = await __createTokens(user.id, user.email, user.firstname, user.lastname);
+      const { token, refreshToken } = __createTokens(user.id, user.email, user.firstname, user.lastname);
       const tokens:any = await this.tokensService.getTokensBySearchOptions({user:{id: user.id}})
       await this.tokensService.update(tokens, {refreshToken, token})
       delete user.password;
@@ -47,12 +45,12 @@ export class AuthController extends BaseUtils {
   }
 
   @MessagePattern('REFRESH_TOKEN')
-  async refreshToken(@Payload('userId') userId:number, @Payload('refreshToken') oldRefreshToken:string) {
+  async refreshToken(@Payload('userId') userId:number, @Payload('refreshToken') oldRefreshToken:string):Promise<TokensEntity> {
     try {
       const tokens:TokensEntity = await this.tokensService.getTokensBySearchOptions({user: {id: userId}}, ["user"], {id: true, refreshToken: true, user: {id: true, email:true, firstname: true, lastname: true}});
       if (!tokens) this._Ex("FAILED-TO-REFRESH", 401, "MS-AUTH_AC_REFRESH_TOKEN");
       if (tokens.refreshToken != oldRefreshToken) this._Ex("TOKENS DOESNT MATCH", 401, "MS-AUTH_AC_REFRESH_TOKEN");
-      const {token, refreshToken} = await __createTokens(userId, tokens.user.email, tokens.user.firstname, tokens.user.lastname);
+      const {token, refreshToken} = __createTokens(userId, tokens.user.email, tokens.user.firstname, tokens.user.lastname);
       return await this.tokensService.update(tokens, {refreshToken, token});
     } catch (error) {
       this._catchEx(error)
@@ -66,7 +64,7 @@ export class AuthController extends BaseUtils {
       if (userExist) this._Ex("USER-ALRDY-EXIST", 400, "MS-AUTH_REGISTER");
       const user:UserEntity = await this.userService.create({...createUserDto, password: await __hashPassword(createUserDto.password)});
       if (!user) this._Ex("FAILED-TO-CREATE-USER", 400, "MS-AUTH_REGISTER");
-      const tokens = await this.tokensService.create({token:'', refreshToken:'', emailToken:'', validationToken: await __createValidationToken(user.id, user.email), user:{id:user.id}})
+      const tokens = await this.tokensService.create({token:'', refreshToken:'', emailToken:'', validationToken: __createValidationToken(user.id, user.email), user:{id:user.id}})
       return {id: user.id, firstname: user.firstname, email: user.email, validationToken: tokens.validationToken}
     } catch (error) {
       this._catchEx(error)
@@ -74,7 +72,7 @@ export class AuthController extends BaseUtils {
   }
 
   @MessagePattern('VALIDATE_USER')
-  async validateUser(@Payload() user:any):Promise<string> {
+  async validateUser(@Payload() user:UserEntity):Promise<string> {
     try {
       await this.userService.updateStatusUser(user, UserStatusEnum.ACTIVE);
       return "USER UPDATED WITH SUCCESS"
@@ -103,5 +101,4 @@ export class AuthController extends BaseUtils {
       this._catchEx(error)
     }
   }
-
 }

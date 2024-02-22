@@ -7,14 +7,12 @@ import { DemandsStatusEnum } from "enums/demands.status.enum";
 
 @Controller()
 export class DemandController extends BaseUtils {
-  constructor(
-    private readonly demandService: DemandService,
-    ) {
+  constructor(private readonly demandService: DemandService) {
     super()
   }
 
   @MessagePattern("GET_ONE_DEMAND")
-  async getOneGroup(@Payload('idDemand') idDemand:number) {
+  async getOneGroup(@Payload('idDemand') idDemand:number):Promise<DemandEntity> {
     try {
       return await this.demandService.getOneById(idDemand, ['group', 'user']);
     } catch (error) {

@@ -1,6 +1,6 @@
 import * as jwt from "jsonwebtoken";
 
-export const __createEmailToken = async (userId: number, email:string) => {
+export const __createEmailToken = (userId: number, email:string):string => {
     let date:Date = new Date();
     const emailDate:number = date.setHours(date.getHours() + 24)
 
@@ -13,7 +13,7 @@ export const __createEmailToken = async (userId: number, email:string) => {
     return emailToken
   }
 
-  export const __createValidationToken = async (userId: number, email:string) => {
+  export const __createValidationToken = (userId: number, email:string):string => {
     let date:Date = new Date();
     const validationDate:number = date.setHours(date.getHours() + 24)
 
@@ -27,7 +27,7 @@ export const __createEmailToken = async (userId: number, email:string) => {
   }
 
 
-  export const __createTokens = async (userId: number, email: string, firstname: string, lastname:string) => {
+  export const __createTokens = (userId: number, email: string, firstname: string, lastname:string):{token:string, refreshToken:string} => {
     let date:Date = new Date();
     const tokenDate:number = date.setHours(date.getHours() + 24)
     const refreshDate:number = date.setDate(date.getDate() + 4 * 7)

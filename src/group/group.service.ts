@@ -13,7 +13,7 @@ export class GroupService extends BaseUtils {
     super()
 }
 
-  async create(createGroupDto: CreateGroupDto) {
+  async create(createGroupDto: CreateGroupDto):Promise<GroupEntity> {
     try {
       return await this.groupRepository.save(createGroupDto)
     } catch (error) {
@@ -21,7 +21,7 @@ export class GroupService extends BaseUtils {
     }
   }
 
-  async getOneById(id: number, relations?: Array<string>, select?:any) {
+  async getOneById(id: number, relations?: Array<string>, select?:{}):Promise<GroupEntity> {
     try {
       return await this.groupRepository.findOne({ where:{id}, relations, select })
     } catch (error) {
@@ -29,7 +29,7 @@ export class GroupService extends BaseUtils {
     }
   }
 
-  async findAll(relations?: Array<string>) {
+  async findAll(relations?: Array<string>):Promise<GroupEntity[]> {
     try {
       return await this.groupRepository.find({ relations })
     } catch (error) {
@@ -37,7 +37,7 @@ export class GroupService extends BaseUtils {
     }
   }
   
-  async update(id: number, updateGroupDto: UpdateGroupDto,  relations?: Array<string>, select?:any) {
+  async update(id: number, updateGroupDto: UpdateGroupDto,  relations?: Array<string>, select?:{}):Promise<GroupEntity> {
     try {
       const result = await this.groupRepository.findOne({ where: { id } , relations, select})
       return this.groupRepository.save(this.groupRepository.merge(result, updateGroupDto))
@@ -46,7 +46,7 @@ export class GroupService extends BaseUtils {
     }
   }
 
-  async delete(id: number) {
+  async delete(id: number):Promise<unknown> {
     try {
       return await this.groupRepository.delete(id)
     } catch (error) {

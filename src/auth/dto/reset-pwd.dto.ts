@@ -1,4 +1,4 @@
-import { IsInt, IsNumber, IsString, Length } from "class-validator"
+import {  IsString, Length } from "class-validator"
 
 export class ResetPwdDto {
     @IsString()
