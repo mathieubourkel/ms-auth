@@ -3,6 +3,8 @@ import { BaseUtils } from 'libs/base/base.utils';
 import { TokensEntity } from './entities/tokens.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CreateTokensDto } from './dto/create-tokens.dto';
+import { UpdateTokensDto } from './dto/update-tokens.dto';
 
 @Injectable()
 export class TokensService extends BaseUtils {
@@ -11,15 +13,15 @@ export class TokensService extends BaseUtils {
     super()
 }
 
-async create(tokens: any){
+async create(data: CreateTokensDto):Promise<TokensEntity>{
   try {
-    return await this.tokensRepository.save(tokens)
+    return await this.tokensRepository.save(data)
   } catch (error) {
     this._catchEx(error)
   }
 }
 
-async getTokensBySearchOptions(searchOptions:{}, relations?: Array<string>, select?:any) {
+async getTokensBySearchOptions(searchOptions:{}, relations?: Array<string>, select?:{}):Promise<TokensEntity> {
   try {
     return await this.tokensRepository.findOne({ where:searchOptions, relations, select })
   } catch (error) {
@@ -27,7 +29,7 @@ async getTokensBySearchOptions(searchOptions:{}, relations?: Array<string>, sele
   }
 }
 
-async update(tokens:any, newTokens:{}, relations?: Array<string>, select?:any) {
+async update(tokens:TokensEntity, newTokens:UpdateTokensDto):Promise<TokensEntity> {
   try {
     return this.tokensRepository.save(this.tokensRepository.merge(tokens, newTokens))
   } catch (error) {
@@ -35,7 +37,7 @@ async update(tokens:any, newTokens:{}, relations?: Array<string>, select?:any) {
   }
 }
 
-async delete(id: number) {
+async delete(id: number):Promise<unknown> {
   try {
     return await this.tokensRepository.delete(id)
   } catch (error) {

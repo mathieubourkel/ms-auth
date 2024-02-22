@@ -3,6 +3,7 @@ import { BaseUtils } from 'libs/base/base.utils';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DemandEntity } from './entities/demand.entity';
+import { CreateDemandDto } from './dto/create-demand.dto';
 
 @Injectable()
 export class DemandService extends BaseUtils {
@@ -11,7 +12,7 @@ export class DemandService extends BaseUtils {
     super()
 }
 
-async getOneById(id: number, relations?: Array<string>, select?:any) {
+async getOneById(id: number, relations?: Array<string>, select?:{}):Promise<DemandEntity> {
   try {
     return await this.demandRepository.findOne({ where:{id}, relations, select })
   } catch (error) {
@@ -19,7 +20,7 @@ async getOneById(id: number, relations?: Array<string>, select?:any) {
   }
 }
 
-async getOneBySearchOption(searchOption: {}, relations?: Array<string>, select?:any) {
+async getOneBySearchOption(searchOption: {}, relations?: Array<string>, select?:{}):Promise<DemandEntity> {
   try {
     return await this.demandRepository.findOne({ where:searchOption, relations, select })
   } catch (error) {
@@ -27,7 +28,7 @@ async getOneBySearchOption(searchOption: {}, relations?: Array<string>, select?:
   }
 }
 
-async getManyBySearchOption(searchOption: {}, relations?: Array<string>, select?:any) {
+async getManyBySearchOption(searchOption: {}, relations?: Array<string>, select?:{}):Promise<DemandEntity[]> {
   try {
     return await this.demandRepository.find({ where:searchOption, relations, select })
   } catch (error) {
@@ -35,7 +36,7 @@ async getManyBySearchOption(searchOption: {}, relations?: Array<string>, select?
   }
 }
 
-async create(data:any){
+async create(data:CreateDemandDto):Promise<DemandEntity>{
   try {
     return await this.demandRepository.save(data)
   } catch (error) {
@@ -43,7 +44,7 @@ async create(data:any){
   }
 }
 
-async update(demand: DemandEntity, data:{status:number}) {
+async update(demand: DemandEntity, data:{status:number}):Promise<DemandEntity> {
   try {
     return this.demandRepository.save(this.demandRepository.merge(demand, data))
   } catch (error) {
@@ -51,7 +52,7 @@ async update(demand: DemandEntity, data:{status:number}) {
   }
 }
 
-async delete(id: number) {
+async delete(id: number):Promise<unknown> {
   try {
     return await this.demandRepository.delete(id)
   } catch (error) {

@@ -13,7 +13,7 @@ export class GroupController extends BaseUtils {
   }
 
   @MessagePattern("ADD_GROUP")
-  async create(@Payload(new ValidationPipe()) createGroupDto: CreateGroupDto) {
+  async create(@Payload(new ValidationPipe()) createGroupDto: CreateGroupDto):Promise<GroupEntity> {
     try {
       return await this.groupService.create(createGroupDto);
     } catch (error) {
@@ -22,7 +22,7 @@ export class GroupController extends BaseUtils {
   }
 
   @MessagePattern("ALL_GROUPS")
-  async findAll() {
+  async findAll():Promise<GroupEntity[]> {
     try {
       return await this.groupService.findAll();
     } catch (error) {
@@ -31,7 +31,7 @@ export class GroupController extends BaseUtils {
   }
 
   @MessagePattern("MODIFY_GROUP")
-  async update(@Payload('body', new ValidationPipe()) updateGroupDto: UpdateGroupDto, @Payload('userId') userId:number) {
+  async update(@Payload('body', new ValidationPipe()) updateGroupDto: UpdateGroupDto, @Payload('userId') userId:number):Promise<GroupEntity> {
     try {
       return await this.groupService.update(userId, updateGroupDto);
     } catch (error) {
@@ -40,7 +40,7 @@ export class GroupController extends BaseUtils {
   }
 
   @MessagePattern("GET_ONE_GROUP")
-  async getOneGroup(@Payload('idGroup') idGroup:number) {
+  async getOneGroup(@Payload('idGroup') idGroup:number):Promise<GroupEntity> {
     try {
       return await this.groupService.getOneById(idGroup, ['owner']);
     } catch (error) {
@@ -49,7 +49,7 @@ export class GroupController extends BaseUtils {
   }
 
   @MessagePattern("DELETE_GROUP")
-  async remove(@Payload('groupId') groupId:number, @Payload('userId') userId:number) {
+  async remove(@Payload('groupId') groupId:number, @Payload('userId') userId:number):Promise<unknown> {
     try {
       const result:GroupEntity = await this.groupService.getOneById(groupId, ["owner"]);
       if (!result) this._Ex("CC-COMPANYT-NOTFIND", 400,"CC");
