@@ -26,7 +26,8 @@ export class AuthController extends BaseUtils {
     try {
       const user:UserEntity = await this.userService.getOneBySearchOptions({email:loginDto.email}, [], {id: true, email:true, password: true, firstname: true, lastname: true, status: true, count: true});
       if (!user) this._Ex("BAD-CREDENTIALS", 401, "MS-AUTH_AC_LOGIN");
-     // if (user.status != 1) this._Ex("ACCOUNT NOT AUTHORIZED", 401, "MS-AUTH_AC_LOGIN")
+      console.log(process.env.NODE_ENV,"env")
+      if (process.env.NODE_ENV === 'production' && user.status != 1) this._Ex("ACCOUNT NOT AUTHORIZED", 401, "MS-AUTH_AC_LOGIN")
       await this.userService.updateCountUser(user)
       if (user.count > 6) {
         await this.userService.updateStatusUser(user, UserStatusEnum.BLOCKED)
